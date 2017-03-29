@@ -2,7 +2,7 @@ package io.policarp.scala.aws.params.reader
 
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 import com.amazonaws.services.simplesystemsmanagement.model.GetParametersRequest
-import com.amazonaws.services.simplesystemsmanagement.{AWSSimpleSystemsManagement, AWSSimpleSystemsManagementClientBuilder}
+import com.amazonaws.services.simplesystemsmanagement.{ AWSSimpleSystemsManagement, AWSSimpleSystemsManagementClientBuilder }
 import io.policarp.scala.aws.params.Params
 import io.policarp.scala.aws.params.Params.ParamResult.ParamResult
 import io.policarp.scala.aws.params.Params._
@@ -64,12 +64,15 @@ object Test extends App {
   val client = AWSSimpleSystemsManagementClientBuilder.standard().withCredentials(new DefaultAWSCredentialsProviderChain()).build()
   val x = ParamReader(client)
 
-  val y : ParamResult[String] = x.read("sean-testing-parameter-store")
+  val y: ParamResult[Long] = x.read("sean-testing-parameter-store")
 
   y match {
-    case Right(v: Param[String]) => println(v.value); println(v.wasSecured);
-    case Right(v: ParamList[String]) => println(v.value.mkString(" and ")); println(v.wasSecured)
-    case Right(v: SecureParam[String]) => println(v.value); println(v.wasSecured)
+    case Right(v: Param[_]) =>
+      println(v.value); println(v.wasSecured);
+    case Right(v: ParamList[_]) =>
+      println(v.value.mkString(" and ")); println(v.wasSecured)
+    case Right(v: SecureParam[_]) =>
+      println(v.value); println(v.wasSecured)
     case Left(i) => println(s"Nope $i")
   }
 

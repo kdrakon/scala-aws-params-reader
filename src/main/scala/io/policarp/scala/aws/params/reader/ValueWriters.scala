@@ -10,4 +10,16 @@ object ValueWriters {
     override def as(param: String): String = param
   }
 
+  implicit object BooleanValueWriter extends ValueWriter[Boolean] {
+    override def as(param: String): Boolean = param.toBoolean
+  }
+
+  implicit object IntValueWriter extends ValueWriter[Int] {
+    override def as(param: String): Int = param.toInt
+  }
+
+  implicit object LongValueWriter extends ValueWriter[Long] {
+    override def as(param: String): Long = param.toLong
+  }
+
 }
