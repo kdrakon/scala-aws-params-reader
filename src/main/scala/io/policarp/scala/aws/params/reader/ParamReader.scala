@@ -4,7 +4,6 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 import com.amazonaws.services.simplesystemsmanagement.model.GetParametersRequest
 import com.amazonaws.services.simplesystemsmanagement.{ AWSSimpleSystemsManagement, AWSSimpleSystemsManagementClientBuilder }
 import io.policarp.scala.aws.params.Params
-import io.policarp.scala.aws.params.Params.ParamResult.ParamResult
 import io.policarp.scala.aws.params.Params._
 import io.policarp.scala.aws.params.reader.ValueWriters.ValueWriter
 
@@ -64,9 +63,9 @@ object Test extends App {
   val client = AWSSimpleSystemsManagementClientBuilder.standard().withCredentials(new DefaultAWSCredentialsProviderChain()).build()
   val x = ParamReader(client)
 
-  val y: ParamResult[Long] = x.read("sean-testing-parameter-store")
+  println(x.read[Long]("sean-testing-parameter-store").right.get.asParam)
 
-  y match {
+  x.read[Long]("sean-testing-parameter-store") match {
     case Right(v: Param[_]) =>
       println(v.value); println(v.wasSecured);
     case Right(v: ParamList[_]) =>
@@ -75,5 +74,4 @@ object Test extends App {
       println(v.value); println(v.wasSecured)
     case Left(i) => println(s"Nope $i")
   }
-
 }

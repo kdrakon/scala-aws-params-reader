@@ -3,12 +3,16 @@ package io.policarp.scala.aws.params
 object Params {
 
   sealed abstract class ParamType(val name: String)
+
   class StringParam extends ParamType("String")
   object StringParam extends StringParam
+
   class StringListParam extends ParamType("StringList")
   object StringListParam extends StringListParam
+
   class SecureStringParam extends ParamType("SecureString")
   object SecureStringParam extends SecureStringParam
+
   class UnknownParam extends ParamType("")
 
   sealed trait ParamLike[A, B <: ParamType] { val name: String }
@@ -31,10 +35,32 @@ object Params {
   }
 
   implicit class ParamLikeImplicits[A, B <: ParamType](param: ParamLike[A, B]) {
+
     def wasSecured: Boolean = {
       param match {
         case _: SecureParam[A] => true
         case _: ParamLike[A, B] => false
+      }
+    }
+
+    def asParam: Option[Param[A]] = {
+      param match {
+        case _: Param[A] => Some(param.asInstanceOf[Param[A]])
+        case _ => None
+      }
+    }
+
+    def asParamList: Option[ParamList[A]] = {
+      param match {
+        case _: ParamList[A] => Some(param.asInstanceOf[ParamList[A]])
+        case _ => None
+      }
+    }
+
+    def asSecureParam: Option[SecureParam[A]] = {
+      param match {
+        case _: SecureParam[A] => Some(param.asInstanceOf[SecureParam[A]])
+        case _ => None
       }
     }
   }
