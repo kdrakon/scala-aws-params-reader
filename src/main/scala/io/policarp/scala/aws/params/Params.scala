@@ -18,49 +18,51 @@ object Params {
   sealed trait ParamLike[A, B <: ParamType] { val name: String }
   case class Param[A](override val name: String, value: A) extends ParamLike[A, StringParam]
   case class ParamList[A](override val name: String, value: Seq[A]) extends ParamLike[A, StringListParam]
-  case class SecureParam[A](override val name: String, value: A) extends ParamLike[A, SecureStringParam]
+  case class SecureParam[A](override val name: String, value: A, encrypted: Boolean) extends ParamLike[A, SecureStringParam]
   case class InvalidParam[A](name: String)
 
   object ParamResult {
-    type ParamResult[A] = Either[InvalidParam[A], ParamLike[A, _ <: ParamType]]
-    type Valid[A, B <: ParamType] = Right[InvalidParam[A], ParamLike[A, B]]
-    type Invalid[A, B <: ParamType] = Left[InvalidParam[A], ParamLike[A, B]]
+    type ParamResult[A, T <: ParamLike[A, _ <: ParamType]] = Either[InvalidParam[A], T]
+    type Valid[A, T <: ParamLike[A, _ <: ParamType]] = Right[InvalidParam[A], T]
+    type Invalid[A, T <: ParamLike[A, _ <: ParamType]] = Left[InvalidParam[A], T]
 
-    def Valid[A, B <: ParamType](p: ParamLike[A, B]): Valid[A, B] = {
-      Right[InvalidParam[A], ParamLike[A, B]](p)
+    def Valid[A, T <: ParamLike[A, _ <: ParamType]](p: T): Valid[A, T] = {
+      Right[InvalidParam[A], T](p)
     }
-    def Invalid[A, B <: ParamType](p: InvalidParam[A]): Invalid[A, B] = {
-      Left[InvalidParam[A], ParamLike[A, B]](p)
+    def Invalid[A, T <: ParamLike[A, _ <: ParamType]](p: InvalidParam[A]): Invalid[A, T] = {
+      Left[InvalidParam[A], T](p)
     }
   }
 
   implicit class ParamLikeImplicits[A, B <: ParamType](param: ParamLike[A, B]) {
 
+    import ParamResult._
+
     def wasSecured: Boolean = {
       param match {
-        case _: SecureParam[A] => true
+        case p: SecureParam[A] if !p.encrypted => true
         case _: ParamLike[A, B] => false
       }
     }
 
-    def asParam: Option[Param[A]] = {
+    def asParam: ParamResult[A, Param[A]] = {
       param match {
-        case _: Param[A] => Some(param.asInstanceOf[Param[A]])
-        case _ => None
+        case p: Param[A] => Valid(p)
+        case _ => Invalid(InvalidParam[A](param.name))
       }
     }
 
-    def asParamList: Option[ParamList[A]] = {
+    def asParamList: ParamResult[A, ParamList[A]] = {
       param match {
-        case _: ParamList[A] => Some(param.asInstanceOf[ParamList[A]])
-        case _ => None
+        case p: ParamList[A] => Valid(p)
+        case _ => Invalid(InvalidParam[A](param.name))
       }
     }
 
-    def asSecureParam: Option[SecureParam[A]] = {
+    def asSecureParam: ParamResult[A, SecureParam[A]] = {
       param match {
-        case _: SecureParam[A] => Some(param.asInstanceOf[SecureParam[A]])
-        case _ => None
+        case p: SecureParam[A] => Valid(p)
+        case _ => Invalid(InvalidParam[A](param.name))
       }
     }
   }
