@@ -1,5 +1,7 @@
 package io.policarp.scala.aws.params.reader
 
+import scala.concurrent.duration.Duration
+
 object ValueWriters {
 
   trait ValueWriter[A] {
@@ -20,6 +22,10 @@ object ValueWriters {
 
   implicit object LongValueWriter extends ValueWriter[Long] {
     override def as(param: String): Long = param.toLong
+  }
+
+  implicit object DurationWriter extends ValueWriter[Duration] {
+    override def as(param: String): Duration = Duration.create(param)
   }
 
 }

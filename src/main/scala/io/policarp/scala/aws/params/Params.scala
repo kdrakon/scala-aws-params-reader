@@ -1,25 +1,45 @@
 package io.policarp.scala.aws.params
 
+import io.policarp.scala.aws.params.Params.ParamLikes._
+import io.policarp.scala.aws.params.Params.ParamTypes._
+
 object Params {
 
-  sealed abstract class ParamType(val name: String)
+  object ParamTypes {
 
-  class StringParam extends ParamType("String")
-  object StringParam extends StringParam
+    sealed abstract class ParamType(val name: String)
 
-  class StringListParam extends ParamType("StringList")
-  object StringListParam extends StringListParam
+    class StringParam extends ParamType("String")
 
-  class SecureStringParam extends ParamType("SecureString")
-  object SecureStringParam extends SecureStringParam
+    class StringListParam extends ParamType("StringList")
 
-  class UnknownParam extends ParamType("")
+    class SecureStringParam extends ParamType("SecureString")
 
-  sealed trait ParamLike[A, B <: ParamType] { val name: String }
-  case class Param[A](override val name: String, value: A) extends ParamLike[A, StringParam]
-  case class ParamList[A](override val name: String, value: Seq[A]) extends ParamLike[A, StringListParam]
-  case class SecureParam[A](override val name: String, value: A, encrypted: Boolean) extends ParamLike[A, SecureStringParam]
-  case class InvalidParam[A](name: String)
+    class UnknownParam extends ParamType("")
+
+    object StringParam extends StringParam
+
+    object StringListParam extends StringListParam
+
+    object SecureStringParam extends SecureStringParam
+
+  }
+
+  object ParamLikes {
+
+    sealed trait ParamLike[A, B <: ParamType] {
+      val name: String
+    }
+
+    case class Param[A](override val name: String, value: A) extends ParamLike[A, StringParam]
+
+    case class ParamList[A](override val name: String, value: Seq[A]) extends ParamLike[A, StringListParam]
+
+    case class SecureParam[A](override val name: String, value: A, encrypted: Boolean) extends ParamLike[A, SecureStringParam]
+
+    case class InvalidParam[A](name: String)
+
+  }
 
   object ParamResult {
     type ParamResult[A, T <: ParamLike[A, _ <: ParamType]] = Either[InvalidParam[A], T]
@@ -29,6 +49,7 @@ object Params {
     def Valid[A, T <: ParamLike[A, _ <: ParamType]](p: T): Valid[A, T] = {
       Right[InvalidParam[A], T](p)
     }
+
     def Invalid[A, T <: ParamLike[A, _ <: ParamType]](p: InvalidParam[A]): Invalid[A, T] = {
       Left[InvalidParam[A], T](p)
     }
@@ -66,5 +87,6 @@ object Params {
       }
     }
   }
+
 }
 

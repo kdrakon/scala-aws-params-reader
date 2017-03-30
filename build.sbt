@@ -1,6 +1,3 @@
-import com.typesafe.sbt.SbtScalariform.ScalariformKeys
-
-import scalariform.formatter.preferences.AlignParameters
 
 name := "scala-aws-param-reader"
 version := "0.0.1"
@@ -11,10 +8,6 @@ organization := "io.policarp"
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-ssm" % "1.11.109"
 )
-
-SbtScalariform.scalariformSettings
-ScalariformKeys.preferences := ScalariformKeys.preferences.value
-  .setPreference(AlignParameters, true)
 
 scalacOptions in ThisBuild ++=  Seq(
   "-deprecation", // Emit warning and location for usages of deprecated APIs.
