@@ -20,6 +20,9 @@ object Test extends App {
   println(params.read[Long]("length"))
   // Right(Param(length, 42))
   
+  println(params.readList[Long]("length"))
+  // Left(InvalidParam(length)) because 'length' is actually a single parameter
+  
   println(params.readList[String]("names"))
   // Right(ParamList(names,ArraySeq(Grayson, Jemma)))
   
