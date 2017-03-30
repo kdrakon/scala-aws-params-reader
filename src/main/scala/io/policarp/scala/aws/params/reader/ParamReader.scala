@@ -2,50 +2,38 @@ package io.policarp.scala.aws.params.reader
 
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement
 import com.amazonaws.services.simplesystemsmanagement.model.{GetParametersRequest, GetParametersResult}
-import io.policarp.scala.aws.params.Params.ParamLikes._
 import io.policarp.scala.aws.params.Params.ParamResult._
-import io.policarp.scala.aws.params.Params.ParamTypes._
-import io.policarp.scala.aws.params.Params._
-import io.policarp.scala.aws.params.reader.ValueWriters.ValueWriter
+import io.policarp.scala.aws.params.reader.ValueWriters.{ListWriter, ValueWriter}
 
 import scala.collection.JavaConverters._
 
 trait ParamReader {
 
   import ParamReader._
-  import io.policarp.scala.aws.params.Params.ParamResult._
 
   implicit val client: AWSSimpleSystemsManagement
 
-  def readMany[A](names: Seq[String], stringListSeparator: String = DefaultStringListParamSeparator, withDecryption: Boolean = true)(implicit valueWriter: ValueWriter[A]): Map[String, ParamResult[A, _ <: ParamLike[A, _ <: ParamType]]] = {
-    val result = client.getParameters(prepareRequest(withDecryption, names: _*))
-    validParameters[A](result, stringListSeparator, withDecryption) ++ invalidParameters[A](result)
-  }
-
-  def read[A](name: String)(implicit valueWriter: ValueWriter[A]): ParamResult[A, Param[A]] = {
+  def read[A](name: String)(implicit valueWriter: ValueWriter[A]): ParamResult[A] = {
     readSingleParam(
       name,
-      DefaultStringListParamSeparator,
-      withDecryption = false,
-      result => result.asParam
+      DefaultStringListParamSeparator, // unused
+      withDecryption = false
     )
   }
 
-  def readList[A](name: String, stringListSeparator: String = DefaultStringListParamSeparator)(implicit valueWriter: ValueWriter[A]): ParamResult[A, ParamList[A]] = {
+  def readList[A](name: String, stringListSeparator: String = DefaultStringListParamSeparator)(implicit valueWriter: ValueWriter[A]): ParamResult[Seq[A]] = {
     readSingleParam(
       name,
       stringListSeparator,
-      withDecryption = false,
-      result => result.asParamList
-    )
+      withDecryption = false
+    )(ListWriter(valueWriter, stringListSeparator), client)
   }
 
-  def readSecure[A](name: String)(implicit valueWriter: ValueWriter[A]): ParamResult[A, SecureParam[A]] = {
+  def readSecure[A](name: String)(implicit valueWriter: ValueWriter[A]): ParamResult[A] = {
     readSingleParam(
       name,
-      DefaultStringListParamSeparator,
-      withDecryption = true,
-      result => result.asSecureParam
+      DefaultStringListParamSeparator, // unused
+      withDecryption = true
     )
   }
 }
@@ -60,17 +48,15 @@ object ParamReader {
     }
   }
 
-  private[ParamReader] def readSingleParam[A, T <: ParamLike[A, _ <: ParamType]](name: String, stringListSeparator: String, withDecryption: Boolean, toT: ParamLike[A, _ <: ParamType] => ParamResult[A, T])(implicit valueWriter: ValueWriter[A], client: AWSSimpleSystemsManagement): ParamResult[A, T] = {
+  private[ParamReader] def readSingleParam[A](name: String, stringListSeparator: String, withDecryption: Boolean)(implicit valueWriter: ValueWriter[A], client: AWSSimpleSystemsManagement): ParamResult[A] = {
 
     val result = client.getParameters(prepareRequest(withDecryption, name))
 
-    type Output = ParamResult[A, T]
-    lazy val whenInvalid = Invalid[A, T](InvalidParam[A](name))
+    type Output = ParamResult[A]
+    lazy val whenInvalid = Invalid[A](InvalidParam[A](name))
 
     invalidParameters[A](result).get(name).fold[Output]({
-      validParameters[A](result, stringListSeparator, withDecryption = false).get(name).fold[Output](whenInvalid)(validResult => {
-        toT(validResult.value)
-      })
+      validParameters(result).get(name).fold[Output](whenInvalid)(validResult => valueWriter.as(name, validResult))
     })(_ => whenInvalid)
   }
 
@@ -78,20 +64,11 @@ object ParamReader {
     new GetParametersRequest().withNames(names: _*).withWithDecryption(withDecryption)
   }
 
-  private[ParamReader] def validParameters[A](result: GetParametersResult, stringListSeparator: String, withDecryption: Boolean)(implicit valueWriter: ValueWriter[A]): Map[String, Valid[A, ParamLike[A, _ <: ParamType]]] = {
-    result.getParameters.asScala.map(p => {
-      p.getType match {
-        case StringParam.name =>
-          p.getName -> Valid[A, Param[A]](Param[A](p.getName, valueWriter.as(p.getValue)))
-        case StringListParam.name =>
-          p.getName -> Valid[A, ParamList[A]](ParamList[A](p.getName, p.getValue.split(stringListSeparator).map(valueWriter.as)))
-        case SecureStringParam.name =>
-          p.getName -> Valid[A, SecureParam[A]](SecureParam[A](p.getName, valueWriter.as(p.getValue), !withDecryption))
-      }
-    }).toMap
+  private[ParamReader] def validParameters(result: GetParametersResult): Map[String, String] = {
+    result.getParameters.asScala.map(p => p.getName -> p.getValue).toMap
   }
 
-  private[ParamReader] def invalidParameters[A](result: GetParametersResult): Map[String, Invalid[A, ParamLike[A, _ <: ParamType]]] = {
+  private[ParamReader] def invalidParameters[A](result: GetParametersResult): Map[String, Invalid[A]] = {
     result.getInvalidParameters.asScala.map(p => p -> Invalid(InvalidParam[A](p))).toMap
   }
 }

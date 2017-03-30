@@ -24,23 +24,13 @@ object Test extends App {
   // Left(InvalidParam(length)) because 'length' is actually a single parameter
   
   println(params.readList[String]("names"))
-  // Right(ParamList(names,ArraySeq(Grayson, Jemma)))
+  // Right(Seq(Grayson,Jemma)))
   
   println(params.readSecure[String]("mysecret"))
-  // Right(SecureParam(mysecret, hunter2, false)) where 'false' indicates it's no longer encrypted
+  // Right(hunter2)
   
   println(params.readSecure[String]("yoursecret"))
   // Left(InvalidParam(yoursecret)) because 'yoursecret' does not exist
-  
-  println(params.readMany[String](Seq("length", "names", "mysecret", "yoursecret"), withDecryption = false))
-  /** 
-   * Map(
-   *   length -> Right(Param(length, 42)), 
-   *   names -> Right(ParamList(names,ArraySeq(Grayson, Jemma))), 
-   *   mysecret -> Right(SecureParam(mysecret, AQECAHjeg2OD8fUwNXm64gLTT8aT3PYKEp+Dt0mF4db2bb4ioAAAAM, true)),
-   *   yoursecret -> Left(InvalidParam(yoursecret))
-   * )
-   */
 }
 
 ```
