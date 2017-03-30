@@ -18,13 +18,16 @@ object Test extends App {
   val params = ParamReader(client)
   
   println(params.read[Long]("length"))
-  // Right(Param(length, 42))
+  // Right(42)
   
   println(params.readList[Long]("length"))
   // Left(InvalidParam(length)) because 'length' is actually a single parameter
   
   println(params.readList[String]("names"))
   // Right(Seq(Grayson,Jemma)))
+  
+  println(params.readList[String]("names", stringListSeparator = ";"))
+  // Right(Seq(alice@somemail.com,bob@anothermail.com)))  
   
   println(params.readSecure[String]("mysecret"))
   // Right(hunter2)
