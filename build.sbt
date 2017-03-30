@@ -10,9 +10,9 @@ libraryDependencies ++= Seq(
 )
 
 scalacOptions in ThisBuild ++=  Seq(
-  "-deprecation", // Emit warning and location for usages of deprecated APIs.
-  "-unchecked", // Enable additional warnings where generated code depends on assumptions.
-  "-Xfatal-warnings", // Fail the compilation if there are any warnings.
+  "-deprecation",
+  "-unchecked",
+  "-Xfatal-warnings",
   "-language:implicitConversions"
 )
 

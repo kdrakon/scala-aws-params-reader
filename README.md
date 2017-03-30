@@ -1,7 +1,12 @@
-# Work in progress
+# Scala AWS Params Reader
+### _...work in progress_
 
-# What?
-Let's you read AWS EC2 system parameters (_parameter store_) in a scala-friendly way.
+## What?
+Let's you read data from AWS' _EC2 Systems Manager Parameter Store_ in a Scala-friendly way.
+
+## Huh?
+- [AWS Systems Manager Parameter Store](http://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-paramstore.html)
+- [Simple Secrets Management via AWS’ EC2 Parameter Store](https://medium.com/@mda590/simple-secrets-management-via-aws-ec2-parameter-store-737477e19450)
 
 ## Example
 ```scala
