@@ -3,7 +3,7 @@ package io.policarp.scala.aws.params.reader
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement
 import com.amazonaws.services.simplesystemsmanagement.model.{GetParametersRequest, GetParametersResult}
 import io.policarp.scala.aws.params.Params.ParamResult._
-import io.policarp.scala.aws.params.reader.ValueWriters.{ListWriter, ValueWriter}
+import io.policarp.scala.aws.params.reader.ValueWriters.ValueWriter
 
 import scala.collection.JavaConverters._
 
