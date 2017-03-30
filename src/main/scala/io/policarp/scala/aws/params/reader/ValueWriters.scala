@@ -21,11 +21,18 @@ object ValueWriters {
         case head :: Nil if head == param => fail // split didn't work
         case params =>
           params.map(p => valueWriter.as(name, p)).foldLeft(init)((result, param) => {
-            for {
-              seq <- result
-              p <- param.fold(_ => fail, r => Valid[Seq[A]](Seq(r)))
-            } yield {
-              seq ++ p
+            // Does not work in pre-2.12 (Either right-biased)
+            // for {
+            //   seq <- result
+            //   p <- param.fold(_ => fail, r => Valid[Seq[A]](Seq(r)))
+            // } yield {
+            //   seq ++ p
+            // }
+
+            // Keep while supporting 2.11
+            result match {
+              case invalid: Invalid[Seq[A]] => invalid
+              case Right(seq) => param.fold(_ => fail, r => Valid[Seq[A]](seq :+ r))
             }
           })
       }

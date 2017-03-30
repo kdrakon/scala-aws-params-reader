@@ -9,7 +9,6 @@ object Params {
     class StringParam extends ParamType("String")
     class StringListParam extends ParamType("StringList")
     class SecureStringParam extends ParamType("SecureString")
-    class UnknownParam extends ParamType("")
 
     object StringParam extends StringParam
     object StringListParam extends StringListParam
