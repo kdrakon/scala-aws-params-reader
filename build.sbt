@@ -9,7 +9,8 @@ libraryDependencies ++= Seq(
 
   "com.amazonaws" % "aws-java-sdk-ssm" % "1.11.109",
 
-  "org.scalacheck" %% "scalacheck" % "1.13.4" % "test"
+  "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
+  "com.github.japgolly.nyaya" %% "nyaya-gen" % "0.8.1" % "test"
 )
 
 scalacOptions in ThisBuild ++=  Seq(

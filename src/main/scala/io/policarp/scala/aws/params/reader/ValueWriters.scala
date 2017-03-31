@@ -44,7 +44,7 @@ object ValueWriters {
     }
   }
 
-  implicit object DurationWriter extends ValueWriter[Duration] {
+  implicit object DurationValueWriter extends ValueWriter[Duration] {
     override def as(name: String, param: String): ParamResult[Duration] = {
       try {
         Valid[Duration](Duration.create(param))

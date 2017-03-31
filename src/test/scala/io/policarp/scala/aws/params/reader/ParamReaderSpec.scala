@@ -8,7 +8,7 @@ import org.scalacheck.{Gen, Properties}
 
 import scala.collection.JavaConverters._
 
-class ParamReaderSpec extends Properties("ParamReader") {
+class ParamReaderSpec extends Properties(classOf[ParamReader].getTypeName) {
 
   property("prepareRequest") = forAll { (withDecryption: Boolean, names: Seq[String]) =>
     ParamReader.prepareRequest(withDecryption, names: _*).getWithDecryption == withDecryption &&
@@ -18,7 +18,7 @@ class ParamReaderSpec extends Properties("ParamReader") {
   property("readSingleParam") = forAll(Gen.oneOf(Seq(StringParam, StringListParam, SecureStringParam))) { paramType =>
 
     forAll { name: String =>
-      val validResult = GetParameterResultGen.genValid(name).sample.get
+      val validResult = GetParameterResultGen.genValid(name).sample
       val param = ParamReader.readSingleParam(name, validResult, paramType)
       if (paramType.name == validResult.getParameters.asScala.head.getType) {
         param == Right(validResult.getParameters.asScala.head.getValue)
@@ -28,7 +28,7 @@ class ParamReaderSpec extends Properties("ParamReader") {
     }
 
     forAll { name: String =>
-      val invalidResult = GetParameterResultGen.genInvalid(name).sample.get
+      val invalidResult = GetParameterResultGen.genInvalid(name).sample
       ParamReader.readSingleParam(name, invalidResult, paramType) == Left(InvalidParam[String](name))
     }
 

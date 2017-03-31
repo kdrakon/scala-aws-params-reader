@@ -1,18 +1,19 @@
 package io.policarp.scala.aws.params.reader
 
 import com.amazonaws.services.simplesystemsmanagement.model.{GetParametersResult, Parameter, ParameterType}
-import org.scalacheck.Gen
+import nyaya.gen.Gen
+
 
 object GetParameterResultGen {
 
   def genValid(name: String): Gen[GetParametersResult] = for {
-    param <- Gen.alphaStr
-    paramType <- Gen.oneOf[ParameterType](ParameterType.values())
+    param <- Gen.alpha.string(0 to 100)
+    paramType <- Gen.chooseArray_![ParameterType](ParameterType.values())
   } yield {
     new GetParametersResult()
       .withParameters(new Parameter().withName(name).withValue(param).withType(paramType))
   }
 
-  def genInvalid(name: String): Gen[GetParametersResult] = Gen.const(new GetParametersResult().withInvalidParameters(name))
+  def genInvalid(name: String): Gen[GetParametersResult] = Gen.pure(new GetParametersResult().withInvalidParameters(name))
 
 }
