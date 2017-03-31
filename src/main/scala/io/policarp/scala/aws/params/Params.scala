@@ -1,18 +1,16 @@
 package io.policarp.scala.aws.params
 
+import com.amazonaws.services.simplesystemsmanagement.model.ParameterType
+
 object Params {
 
   object ParamTypes {
 
-    sealed abstract class ParamType(val name: String)
+    sealed case class ParamType(name: String)
 
-    class StringParam extends ParamType("String")
-    class StringListParam extends ParamType("StringList")
-    class SecureStringParam extends ParamType("SecureString")
-
-    object StringParam extends StringParam
-    object StringListParam extends StringListParam
-    object SecureStringParam extends SecureStringParam
+    object StringParam extends ParamType(ParameterType.String.toString)
+    object StringListParam extends ParamType(ParameterType.StringList.toString)
+    object SecureStringParam extends ParamType(ParameterType.SecureString.toString)
   }
 
   object ParamResult {
