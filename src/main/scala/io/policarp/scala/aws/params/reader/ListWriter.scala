@@ -8,10 +8,10 @@ case class ListWriter[A](valueWriter: ValueWriter[A], stringListSeparator: Strin
 
     lazy val init: ParamResult[Seq[A]] = Valid(Seq[A]())
     lazy val fail: ParamResult[Seq[A]] = Invalid(InvalidParam[Seq[A]](name))
-    val split = param.split(stringListSeparator).toSeq
+    val split = param.split(stringListSeparator).toList
 
     split match {
-      case head :: Nil if head == param => fail // split didn't work
+      case head :: Nil if head == param => fail // because split didn't work
       case params =>
         params.map(p => valueWriter.as(name, p)).foldLeft(init)((result, param) => {
           // Does not work in pre-2.12 (Either right-biased)
