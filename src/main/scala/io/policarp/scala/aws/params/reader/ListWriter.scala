@@ -1,14 +1,15 @@
 package io.policarp.scala.aws.params.reader
 
 import io.policarp.scala.aws.params.Params.ParamResult.{Invalid, InvalidParam, ParamResult, Valid}
+import io.policarp.scala.aws.params.reader.ListWriter.ListSeparator
 import io.policarp.scala.aws.params.reader.ValueWriters.ValueWriter
 
-case class ListWriter[A](valueWriter: ValueWriter[A], stringListSeparator: String) extends ValueWriter[Seq[A]] {
+case class ListWriter[A](valueWriter: ValueWriter[A], listSeparator: ListSeparator) extends ValueWriter[Seq[A]] {
   override def as(name: String, param: String): ParamResult[Seq[A]] = {
 
     lazy val init: ParamResult[Seq[A]] = Valid(Seq[A]())
     lazy val fail: ParamResult[Seq[A]] = Invalid(InvalidParam[Seq[A]](name))
-    val split = param.split(stringListSeparator).toList
+    val split = param.split(listSeparator.separator).toList
 
     split match {
       case head :: Nil if head.isEmpty => init
@@ -30,4 +31,13 @@ case class ListWriter[A](valueWriter: ValueWriter[A], stringListSeparator: Strin
         })
     }
   }
+}
+
+object ListWriter {
+
+  sealed case class ListSeparator(separator: String)
+  object Comma extends ListSeparator(",")
+  object Semicolon extends ListSeparator(";")
+  object Space extends ListSeparator(" ")
+
 }

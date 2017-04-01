@@ -12,7 +12,7 @@ class ParamReaderSpec extends Properties(classOf[ParamReader].getTypeName) {
 
   property("prepareRequest") = forAll { (withDecryption: Boolean, names: Seq[String]) =>
     ParamReader.prepareRequest(withDecryption, names: _*).getWithDecryption == withDecryption &&
-    ParamReader.prepareRequest(withDecryption, names: _*).getNames.asScala == names
+      ParamReader.prepareRequest(withDecryption, names: _*).getNames.asScala == names
   }
 
   property("readSingleParam") = forAll(Gen.oneOf(Seq(StringParam, StringListParam, SecureStringParam))) { paramType =>

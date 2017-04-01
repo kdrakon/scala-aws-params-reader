@@ -4,6 +4,7 @@ import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement
 import com.amazonaws.services.simplesystemsmanagement.model.{GetParametersRequest, GetParametersResult, Parameter}
 import io.policarp.scala.aws.params.Params.ParamResult._
 import io.policarp.scala.aws.params.Params.ParamTypes.{ParamType, SecureStringParam, StringListParam, StringParam}
+import io.policarp.scala.aws.params.reader.ListWriter.ListSeparator
 import io.policarp.scala.aws.params.reader.ValueWriters.ValueWriter
 
 import scala.collection.JavaConverters._
@@ -22,12 +23,12 @@ trait ParamReader {
     )
   }
 
-  def readList[A](name: String, stringListSeparator: String = DefaultStringListParamSeparator)(implicit valueWriter: ValueWriter[A]): ParamResult[Seq[A]] = {
+  def readList[A](name: String, listSeparator: ListSeparator = DefaultStringListParamSeparator)(implicit valueWriter: ValueWriter[A]): ParamResult[Seq[A]] = {
     readSingleParam(
       name,
       client.getParameters(prepareRequest(withDecryption = false, name)),
       StringListParam
-    )(ListWriter(valueWriter, stringListSeparator))
+    )(ListWriter(valueWriter, listSeparator))
   }
 
   def readSecure[A](name: String)(implicit valueWriter: ValueWriter[A]): ParamResult[A] = {
@@ -41,7 +42,7 @@ trait ParamReader {
 
 object ParamReader {
 
-  val DefaultStringListParamSeparator = ","
+  val DefaultStringListParamSeparator = ListWriter.Comma
 
   def apply(awsSimpleSystemsManagement: AWSSimpleSystemsManagement): ParamReader = {
     new ParamReader {
@@ -65,16 +66,16 @@ object ParamReader {
     })(_ => whenInvalid)
   }
 
-  private[reader] def prepareRequest(withDecryption: Boolean, names: String*): GetParametersRequest = {
-    new GetParametersRequest().withNames(names: _*).withWithDecryption(withDecryption)
-  }
-
   private[reader] def validParameters(result: GetParametersResult): Map[String, Parameter] = {
     result.getParameters.asScala.map(p => p.getName -> p).toMap
   }
 
   private[reader] def invalidParameters[A](result: GetParametersResult): Map[String, Invalid[A]] = {
     result.getInvalidParameters.asScala.map(p => p -> Invalid(InvalidParam[A](p))).toMap
+  }
+
+  private[reader] def prepareRequest(withDecryption: Boolean, names: String*): GetParametersRequest = {
+    new GetParametersRequest().withNames(names: _*).withWithDecryption(withDecryption)
   }
 }
 

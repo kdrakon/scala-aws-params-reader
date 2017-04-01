@@ -16,6 +16,7 @@ package io.policarp.scala
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder
 import io.policarp.scala.aws.params.reader.ParamReader
+import io.policarp.scala.aws.params.reader.ListWriter._
 
 object Test extends App {
 
@@ -29,10 +30,10 @@ object Test extends App {
   // Left(InvalidParam(length)) because 'length' is actually a single parameter
   
   println(params.readList[String]("names"))
-  // Right(Seq(Grayson,Jemma)))
+  // Right(List(Grayson,Jemma)))
   
-  println(params.readList[String]("emails", stringListSeparator = ";"))
-  // Right(Seq(alice@somemail.com,bob@anothermail.com)))  
+  println(params.readList[String]("emails", listSeparator = Semicolon))
+  // Right(List(alice@somemail.com,bob@anothermail.com)))  
   
   println(params.readSecure[String]("mysecret"))
   // Right(hunter2)

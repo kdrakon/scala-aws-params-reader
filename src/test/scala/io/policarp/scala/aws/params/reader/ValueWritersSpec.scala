@@ -35,6 +35,7 @@ class ValueWritersSpec extends Properties("ValueWriters") {
   case class DurationTuple(time: Long, unit: String) {
     def toDuration: Duration = Duration.create(s"$time $unit")
   }
+
   implicit val DurationTupleGen: Gen[DurationTuple] = for {
     time <- Gen.chooseNum[Long](0, 252)
     unit <- Gen.oneOf("d, day, h, hour, min, minute, s, sec, second, ms, milli, millisecond, µs, micro, microsecond, ns, nano, nanosecond".split(","))
@@ -52,24 +53,26 @@ class ValueWritersSpec extends Properties("ValueWriters") {
 
 class ListWriterSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
 
+  import ListWriter._
+
   val someName = "blah"
-  val separators = Seq(",", ";", " ")
+  val separators = Seq(Comma, Semicolon, Space)
 
   "The ListWriter and LongValueWriter" should {
     "parse a Long List" in {
-      forAll(Gen.oneOf(separators), Gen.nonEmptyListOf(Gen.chooseNum(Long.MinValue, Long.MaxValue))) { (separator: String, numbersList: List[Long]) =>
-        ListWriter[Long](LongValueWriter, separator).as(someName, numbersList.mkString(separator)) should equal(Right(numbersList))
+      forAll(Gen.oneOf(separators), Gen.nonEmptyListOf(Gen.chooseNum(Long.MinValue, Long.MaxValue))) { (listSeparator: ListSeparator, numbersList: List[Long]) =>
+        ListWriter[Long](LongValueWriter, listSeparator).as(someName, numbersList.mkString(listSeparator.separator)) should equal(Right(numbersList))
       }
     }
   }
 
   "The ListWriter and StringValueWriter" should {
     "parse String List's" in {
-      forAll(Gen.oneOf(separators), Gen.nonEmptyListOf(Gen.alphaStr)) { (separator: String, list: List[String]) =>
-        if (list.mkString(separator) == ""){
-          ListWriter[String](StringValueWriter, separator).as(someName, list.mkString(separator)) should equal(Right(List()))
+      forAll(Gen.oneOf(separators), Gen.nonEmptyListOf(Gen.alphaStr)) { (listSeparator: ListSeparator, list: List[String]) =>
+        if (list.mkString(listSeparator.separator) == "") {
+          ListWriter[String](StringValueWriter, listSeparator).as(someName, list.mkString(listSeparator.separator)) should equal(Right(List()))
         } else {
-          ListWriter[String](StringValueWriter, separator).as(someName, list.mkString(separator)) should equal(Right(list))
+          ListWriter[String](StringValueWriter, listSeparator).as(someName, list.mkString(listSeparator.separator)) should equal(Right(list))
         }
       }
     }
