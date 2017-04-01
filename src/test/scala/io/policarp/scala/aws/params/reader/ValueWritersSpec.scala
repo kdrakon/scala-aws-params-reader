@@ -68,7 +68,7 @@ class ListWriterSpec extends WordSpec with Matchers with GeneratorDrivenProperty
 
   "The ListWriter and StringValueWriter" should {
     "parse String List's" in {
-      forAll(Gen.oneOf(separators), Gen.nonEmptyListOf(Gen.alphaStr)) { (listSeparator: ListSeparator, list: List[String]) =>
+      forAll(Gen.oneOf(separators), Gen.nonEmptyListOf(Gen.alphaStr.suchThat(_ => !separators.contains(ListSeparator(_))))) { (listSeparator: ListSeparator, list: List[String]) =>
         if (list.mkString(listSeparator.separator) == "") {
           ListWriter[String](StringValueWriter, listSeparator).as(someName, list.mkString(listSeparator.separator)) should equal(Right(List()))
         } else {
