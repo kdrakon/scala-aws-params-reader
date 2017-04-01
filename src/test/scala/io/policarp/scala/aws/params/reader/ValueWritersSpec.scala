@@ -4,6 +4,8 @@ import io.policarp.scala.aws.params.Params.ParamResult._
 import io.policarp.scala.aws.params.reader.ValueWriters._
 import org.scalacheck.Prop._
 import org.scalacheck.{Gen, Properties}
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.duration.Duration
 
@@ -48,26 +50,29 @@ class ValueWritersSpec extends Properties("ValueWriters") {
 
 }
 
-class ListWriterSpec extends Properties(classOf[ListWriter[_]].getTypeName) {
+class ListWriterSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
 
   val someName = "blah"
-
   val separators = Seq(",", ";", " ")
 
-  property("as 1") = forAll(Gen.oneOf(separators), Gen.nonEmptyListOf(Gen.chooseNum(Long.MinValue, Long.MaxValue))) { (separator: String, numbersList: List[Long]) =>
-    ListWriter[Long](LongValueWriter, separator).as(someName, numbersList.mkString(separator)) == Right(numbersList)
+  "The ListWriter and LongValueWriter" should {
+    "parse a Long List" in {
+      forAll(Gen.oneOf(separators), Gen.nonEmptyListOf(Gen.chooseNum(Long.MinValue, Long.MaxValue))) { (separator: String, numbersList: List[Long]) =>
+        ListWriter[Long](LongValueWriter, separator).as(someName, numbersList.mkString(separator)) should equal(Right(numbersList))
+      }
+    }
   }
 
-  property("as 2") = forAll(Gen.const("")) { (nonList: String) =>
-    ListWriter[String](StringValueWriter, ",").as(someName, nonList) == Right(List[String]())
-  }
-
-  property("as 3") = forAll(Gen.oneOf(separators), Gen.listOf(Gen.alphaStr.suchThat(_.nonEmpty))) { (separator: String, list: List[String]) =>
-    ListWriter[String](StringValueWriter, separator).as(someName, list.mkString(separator)) == Right(list)
-  }
-
-  property("as 4") = forAll(Gen.alphaStr.suchThat(s => s.nonEmpty && !s.contains(","))) { (nonList: String) =>
-    ListWriter[String](StringValueWriter, ",").as(someName, nonList) == Right(List(nonList))
+  "The ListWriter and StringValueWriter" should {
+    "parse String List's" in {
+      forAll(Gen.oneOf(separators), Gen.nonEmptyListOf(Gen.alphaStr)) { (separator: String, list: List[String]) =>
+        if (list.mkString(separator) == ""){
+          ListWriter[String](StringValueWriter, separator).as(someName, list.mkString(separator)) should equal(Right(List()))
+        } else {
+          ListWriter[String](StringValueWriter, separator).as(someName, list.mkString(separator)) should equal(Right(list))
+        }
+      }
+    }
   }
 
 }
