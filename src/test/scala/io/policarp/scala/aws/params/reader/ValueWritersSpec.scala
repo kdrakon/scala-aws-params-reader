@@ -1,7 +1,5 @@
 package io.policarp.scala.aws.params.reader
 
-import java.util.concurrent.TimeUnit
-
 import io.policarp.scala.aws.params.Params.ParamResult._
 import io.policarp.scala.aws.params.reader.ValueWriters._
 import org.scalacheck.Prop._
@@ -46,6 +44,30 @@ class ValueWritersSpec extends Properties("ValueWriters") {
     val name = rName.sample()
     DurationValueWriter.as(name, s"${duration.time} ${duration.unit}") == Right(duration.toDuration) &&
       DurationValueWriter.as(name, garbage) == Invalid(InvalidParam(name))
+  }
+
+}
+
+class ListWriterSpec extends Properties(classOf[ListWriter[_]].getTypeName) {
+
+  val someName = "blah"
+
+  val separators = Seq(",", ";", " ")
+
+  property("as 1") = forAll(Gen.oneOf(separators), Gen.nonEmptyListOf(Gen.chooseNum(Long.MinValue, Long.MaxValue))) { (separator: String, numbersList: List[Long]) =>
+    ListWriter[Long](LongValueWriter, separator).as(someName, numbersList.mkString(separator)) == Right(numbersList)
+  }
+
+  property("as 2") = forAll(Gen.const("")) { (nonList: String) =>
+    ListWriter[String](StringValueWriter, ",").as(someName, nonList) == Right(List[String]())
+  }
+
+  property("as 3") = forAll(Gen.oneOf(separators), Gen.listOf(Gen.alphaStr.suchThat(_.nonEmpty))) { (separator: String, list: List[String]) =>
+    ListWriter[String](StringValueWriter, separator).as(someName, list.mkString(separator)) == Right(list)
+  }
+
+  property("as 4") = forAll(Gen.alphaStr.suchThat(s => s.nonEmpty && !s.contains(","))) { (nonList: String) =>
+    ListWriter[String](StringValueWriter, ",").as(someName, nonList) == Right(List(nonList))
   }
 
 }

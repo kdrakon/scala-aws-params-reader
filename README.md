@@ -31,7 +31,7 @@ object Test extends App {
   println(params.readList[String]("names"))
   // Right(Seq(Grayson,Jemma)))
   
-  println(params.readList[String]("names", stringListSeparator = ";"))
+  println(params.readList[String]("emails", stringListSeparator = ";"))
   // Right(Seq(alice@somemail.com,bob@anothermail.com)))  
   
   println(params.readSecure[String]("mysecret"))

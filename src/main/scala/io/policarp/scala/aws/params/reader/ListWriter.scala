@@ -11,7 +11,7 @@ case class ListWriter[A](valueWriter: ValueWriter[A], stringListSeparator: Strin
     val split = param.split(stringListSeparator).toList
 
     split match {
-      case head :: Nil if head == param => fail // because split didn't work
+      case head :: Nil if head.isEmpty => init
       case params =>
         params.map(p => valueWriter.as(name, p)).foldLeft(init)((result, param) => {
           // Does not work in pre-2.12 (Either right-biased)
