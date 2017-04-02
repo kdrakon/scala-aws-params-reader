@@ -1,4 +1,5 @@
 # Scala AWS Params Reader
+[![Build Status](https://travis-ci.org/kdrakon/scala-aws-params-reader.svg?branch=master)](https://travis-ci.org/kdrakon/scala-aws-params-reader)
 ### _...work in progress_
 
 ## What?
