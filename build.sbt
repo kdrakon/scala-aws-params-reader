@@ -36,10 +36,11 @@ developers := List(
   Developer(
     id    = "kdrakon",
     name  = "Sean Policarpio",
-    email = "kdrakon@gmail.com",
+    email = "",
     url   = url("http://policarp.io")
   )
 )
+useGpg := true
 publishTo := {
   val nexus = "https://oss.sonatype.org/"
   if (isSnapshot.value)
