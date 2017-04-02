@@ -1,5 +1,7 @@
 # Scala AWS Params Reader
 [![Build Status](https://travis-ci.org/kdrakon/scala-aws-params-reader.svg?branch=master)](https://travis-ci.org/kdrakon/scala-aws-params-reader)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.policarp/scala-aws-params-reader_2.12/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.policarp/scala-aws-params-reader_2.12)
+
 
 ## What?
 A library that lets you read data from AWS' _EC2 Systems Manager Parameter Store_ in a Scala-friendly way. It supports reading data in AWS' three formats - _String, StringList, and SecureString_ - implicitly into Scala types.
