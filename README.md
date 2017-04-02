@@ -1,9 +1,8 @@
 # Scala AWS Params Reader
 [![Build Status](https://travis-ci.org/kdrakon/scala-aws-params-reader.svg?branch=master)](https://travis-ci.org/kdrakon/scala-aws-params-reader)
-### _...work in progress_
 
 ## What?
-Let's you read data from AWS' _EC2 Systems Manager Parameter Store_ in a Scala-friendly way.
+A library that lets you read data from AWS' _EC2 Systems Manager Parameter Store_ in a Scala-friendly way. It supports reading data in AWS' three formats - _String, StringList, and SecureString_ - implicitly into Scala types.
 
 ## Huh?
 - [AWS Systems Manager Parameter Store](http://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-paramstore.html)
@@ -37,10 +36,15 @@ object Test extends App {
   // Right(List(alice@somemail.com,bob@anothermail.com)))  
   
   println(params.readSecure[String]("mysecret"))
-  // Right(hunter2)
+  // Right(hunter2), where data is decrypted using Amazon's Key Management Service if your credentials allow for it
   
   println(params.readSecure[String]("yoursecret"))
-  // Left(InvalidParam(yoursecret)) because 'yoursecret' does not exist
+  // Left(InvalidParam(yoursecret)) because 'yoursecret' does not exist OR your credentials don't allow for reading
 }
 
 ```
+## Other Types?
+Simply provide an implementation of the trait `ValueWriter`. It's basically:
+ - `String => ParamResult[A]`, 
+ - where `ParamResult` is an alias to `Either[InvalidParam[A], A]`, and
+ - `InvalidParam` is simply a case class wrapping the name of the invalid parameter.
