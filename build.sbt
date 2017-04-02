@@ -1,9 +1,17 @@
+import sbt.url
 
-name := "scala-aws-param-reader"
-version := "0.0.1"
+name := "scala-aws-params-reader"
+version := "0.1.0"
 scalaVersion := "2.12.1"
 crossScalaVersions := Seq("2.11.8", "2.12.1")
 organization := "io.policarp"
+homepage := Some(url("https://github.com/kdrakon/scala-aws-params-reader"))
+scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/kdrakon/scala-aws-params-reader"),
+    "scm:git@github.com:kdrakon/scala-aws-params-reader.git"
+  )
+)
 
 libraryDependencies ++= Seq(
 
@@ -20,4 +28,23 @@ scalacOptions in ThisBuild ++=  Seq(
   "-Xfatal-warnings",
   "-language:implicitConversions"
 )
+
+pomIncludeRepository := { _ => false }
+publishMavenStyle := true
+licenses := Seq("Apache License 2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.txt"))
+developers := List(
+  Developer(
+    id    = "kdrakon",
+    name  = "Sean Policarpio",
+    email = "kdrakon@gmail.com",
+    url   = url("http://policarp.io")
+  )
+)
+publishTo := {
+  val nexus = "https://oss.sonatype.org/"
+  if (isSnapshot.value)
+    Some("snapshots" at nexus + "content/repositories/snapshots")
+  else
+    Some("releases"  at nexus + "service/local/staging/deploy/maven2")
+}
 
