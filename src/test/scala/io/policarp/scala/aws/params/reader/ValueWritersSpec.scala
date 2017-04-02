@@ -14,7 +14,7 @@ class ValueWritersSpec extends Properties("ValueWriters") {
   def rName: nyaya.gen.Gen[String] = nyaya.gen.Gen.alpha.string(0 to 100)
 
   property("StringValueWriter") = forAll { string: String =>
-    StringValueWriter.as(rName.sample, string) == Valid[String](string)
+    StringValueWriter.as(rName.sample, string) == Valid[String](string.trim)
   }
 
   property("BooleanValueWriter") = forAll { (bool: Boolean, garbage: String) =>
@@ -66,13 +66,21 @@ class ListWriterSpec extends WordSpec with Matchers with GeneratorDrivenProperty
     }
   }
 
+  def RandomList(listSeparator: ListSeparator): Gen[String] = for {
+    list <- Gen.listOf(Gen.alphaStr.suchThat(!_.contains(listSeparator.separator)))
+  } yield {
+    list.mkString(listSeparator.separator)
+  }
+
   "The ListWriter and StringValueWriter" should {
     "parse String List's" in {
-      forAll(Gen.oneOf(separators), Gen.nonEmptyListOf(Gen.alphaStr.suchThat(_ => !separators.contains(ListSeparator(_))))) { (listSeparator: ListSeparator, list: List[String]) =>
-        if (list.mkString(listSeparator.separator) == "") {
-          ListWriter[String](StringValueWriter, listSeparator).as(someName, list.mkString(listSeparator.separator)) should equal(Right(List()))
+      forAll(Gen.oneOf(separators)) { (listSeparator: ListSeparator) =>
+        val list = RandomList(listSeparator).sample.get
+        val output: List[String] = list.split(listSeparator.separator).map(_.trim).toList
+        if (list.trim.isEmpty) {
+          ListWriter[String](StringValueWriter, listSeparator).as(someName, list) should equal(Right(List[String]()))
         } else {
-          ListWriter[String](StringValueWriter, listSeparator).as(someName, list.mkString(listSeparator.separator)) should equal(Right(list))
+          ListWriter[String](StringValueWriter, listSeparator).as(someName, list) should equal(Right(output))
         }
       }
     }

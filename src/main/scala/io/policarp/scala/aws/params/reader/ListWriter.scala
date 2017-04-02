@@ -12,7 +12,7 @@ case class ListWriter[A](valueWriter: ValueWriter[A], listSeparator: ListSeparat
     val split = param.split(listSeparator.separator).toList
 
     split match {
-      case head :: Nil if head.isEmpty => init
+      case head :: Nil if head.trim.isEmpty => init
       case params =>
         params.map(p => valueWriter.as(name, p)).foldLeft(init)((result, param) => {
           // Does not work in pre-2.12 (Either right-biased)

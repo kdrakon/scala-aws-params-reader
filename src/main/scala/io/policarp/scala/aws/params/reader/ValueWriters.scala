@@ -11,7 +11,7 @@ object ValueWriters {
   }
 
   implicit object StringValueWriter extends ValueWriter[String] {
-    override def as(name: String, param: String): ParamResult[String] = Valid[String](param)
+    override def as(name: String, param: String): ParamResult[String] = Valid[String](param.trim)
   }
 
   implicit object BooleanValueWriter extends ValueWriter[Boolean] {
